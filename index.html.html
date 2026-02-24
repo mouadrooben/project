@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طاقة الرياح — تسخير الرياح من أجل غدٍ أنظف</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    (function(){
+      var stored = localStorage.getItem('theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (stored === 'dark' || (!stored && prefersDark)) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    })();
+  </script>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --accent: #2e86de;
+      --nav-bg: #ffffff;
+    }
+    html.dark {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --text: #e6edf3;
+      --accent: #58a6ff;
+      --nav-bg: #161b22;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      text-align: right;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+    section { padding: 4rem 0; }
+    section h2 { margin-top: 0; color: var(--accent); font-size: 1.75rem; }
+    .card { background: var(--surface); border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    html.dark .card { box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+
+    /* Nav */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.5rem;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    html.dark nav { border-bottom-color: rgba(255,255,255,0.08); }
+    nav .logo { font-weight: 700; font-size: 1.25rem; color: var(--text); text-decoration: none; }
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      position: relative;
+      padding: 0.25rem 0;
+    }
+    nav a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+    nav a:hover::after { transform: scaleX(1); transform-origin: right; }
+    nav a.active { color: var(--accent); }
+    nav .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+    nav .theme-btn, nav .hamburger {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.25rem;
+      padding: 0.35rem;
+      color: var(--text);
+      border-radius: 6px;
+    }
+    nav .hamburger { display: none; }
+    @media (max-width: 767px) {
+      nav .hamburger { display: block; }
+      nav ul {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background: var(--nav-bg);
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s ease;
+      }
+      html.dark nav ul { border-bottom-color: rgba(255,255,255,0.08); }
+      nav ul.open { max-height: 320px; }
+      nav ul li { padding: 0.75rem; }
+    }
+
+    /* Hero */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #87ceeb 0%, #2e86de 50%, #1a5276 100%);
+      color: #fff;
+    }
+    html.dark #hero { background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%); }
+    #hero .hero-content { position: relative; z-index: 1; }
+    #hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      margin: 0 0 0.5rem;
+      opacity: 0;
+      animation: heroFade 1s ease forwards;
+    }
+    #hero .subtitle {
+      font-size: 1.2rem;
+      opacity: 0;
+      animation: heroFade 1s ease 0.2s forwards;
+      margin-bottom: 1.5rem;
+    }
+    #hero .cta {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      border: 2px solid rgba(255,255,255,0.5);
+      opacity: 0;
+      animation: heroFade 1s ease 0.4s forwards;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    #hero .cta:hover { background: rgba(255,255,255,0.3); border-color: #fff; }
+    @keyframes heroFade {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #hero .turbine-svg {
+      position: absolute;
+      right: 10%;
+      bottom: 15%;
+      width: 120px;
+      height: 120px;
+      opacity: 0.4;
+    }
+    #hero .turbine-svg .blades { animation: rotate 8s linear infinite; transform-origin: 50% 50%; }
+    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* Scroll-triggered sections */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Overview */
+    #overview .icon-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    #overview .icon-card { text-align: center; padding: 1rem; }
+    #overview .icon-card span { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+
+    /* How it works — timeline */
+    #how-it-works .timeline { display: grid; gap: 1.5rem; margin-top: 1.5rem; }
+    #how-it-works .step { display: flex; gap: 1rem; align-items: flex-start; }
+    #how-it-works .step-num {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    #how-it-works .step h3 { margin: 0 0 0.25rem; }
+    #how-it-works .step p { margin: 0; }
+
+    /* Types — 2x2 grid */
+    #types .grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1.5rem; }
+    @media (max-width: 600px) { #types .grid-2x2 { grid-template-columns: 1fr; } }
+    #types .type-card {
+      padding: 1.25rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    #types .type-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    #types .type-card { cursor: pointer; }
+    #types .type-content { flex: 1; }
+    #types .type-card h3 { margin-top: 0; color: var(--accent); }
+
+    /* Benefits — grid */
+    #benefits .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    #benefits .benefit-card { display: flex; gap: 1rem; align-items: flex-start; }
+    #benefits .benefit-card span { font-size: 1.5rem; flex-shrink: 0; }
+
+    /* Environment — table */
+    #environment .env-table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #environment table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    #environment th, #environment td { padding: 0.75rem; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    html.dark #environment th, html.dark #environment td { border-color: rgba(255,255,255,0.1); }
+    #environment th { color: var(--accent); font-weight: 600; }
+
+    /* Future */
+    #future .future-list { margin-top: 1rem; }
+    #future .future-list li { margin-bottom: 0.5rem; }
+
+    /* Gallery */
+    #gallery .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    #gallery .gallery-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      aspect-ratio: 16/10;
+    }
+    html.dark #gallery .gallery-item { box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+    #gallery .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    #gallery .gallery-item .caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1rem;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 0.9rem;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    #gallery .gallery-item:hover .caption { transform: translateY(0); }
+    #gallery .gallery-item { cursor: pointer; }
+
+    /* Gallery Lightbox — zoom & inspect */
+    #gallery-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+    #gallery-lightbox.open { display: flex; }
+    #gallery-lightbox .lightbox-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #gallery-lightbox .lightbox-img-wrap {
+      position: relative;
+      transform-origin: center center;
+      transition: transform 0.15s ease-out;
+      cursor: grab;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #gallery-lightbox .lightbox-img-wrap.dragging { cursor: grabbing; }
+    #gallery-lightbox .lightbox-img-wrap img {
+      max-width: 100%;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+    #gallery-lightbox .lightbox-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1rem 4rem 4rem 1rem;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      color: #fff;
+      font-size: 0.95rem;
+      text-align: right;
+    }
+    html[dir="rtl"] #gallery-lightbox .lightbox-caption { padding: 1rem 1rem 4rem 4rem; }
+    #gallery-lightbox .lightbox-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      font-size: 1.5rem;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    html[dir="rtl"] #gallery-lightbox .lightbox-close { right: auto; left: 1rem; }
+    #gallery-lightbox .lightbox-close:hover { background: rgba(255,255,255,0.3); }
+    #gallery-lightbox .lightbox-controls {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+    html[dir="rtl"] #gallery-lightbox .lightbox-controls { left: auto; right: 1rem; }
+    #gallery-lightbox .lightbox-controls button {
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      font-size: 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #gallery-lightbox .lightbox-controls button:hover { background: rgba(255,255,255,0.3); }
+    #gallery-lightbox .lightbox-controls button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--surface);
+      color: var(--text);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+    html.dark footer { border-top-color: rgba(255,255,255,0.08); }
+    footer .tagline { font-size: 1.1rem; margin-bottom: 1rem; }
+    footer .footer-links { margin-bottom: 1rem; }
+    footer .footer-links a { color: var(--accent); text-decoration: none; margin: 0 0.5rem; }
+    footer .back-top {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    
+    @media (max-width: 767px) {
+      section { padding: 2rem 0; }
+      section h2 { font-size: 1.4rem; }
+      #hero {
+        padding: 4rem 1.5rem;
+        min-height: 100svh;
+      }
+      #hero .turbine-svg { display: none; }
+      nav { flex-wrap: nowrap; }
+      footer .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #benefits .benefits-grid { grid-template-columns: 1fr; }
+      #gallery .gallery-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (hover: none) {
+      #gallery .gallery-item .caption { transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="#" class="logo">طاقة الرياح</a>
+    <ul>
+      <li><a href="#overview">نظرة عامة</a></li>
+      <li><a href="#how-it-works">كيف يعمل</a></li>
+      <li><a href="#types">الأنواع</a></li>
+      <li><a href="#benefits">الفوائد</a></li>
+      <li><a href="#environment">البيئة</a></li>
+      <li><a href="#future">المستقبل</a></li>
+      <li><a href="#gallery">المعرض</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="hamburger" type="button" aria-label="القائمة">☰</button>
+      <button class="theme-btn" type="button" aria-label="تبديل المظهر">🌙</button>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="hero-content">
+      <h1>طاقة الرياح</h1>
+      <p class="subtitle">طاقة نظيفة ومتجددة من الرياح</p>
+      <a href="#overview" class="cta">اكتشف المزيد</a>
+    </div>
+    <svg class="turbine-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g class="blades">
+        <line x1="50" y1="50" x2="50" y2="15" stroke="currentColor" stroke-width="4"/>
+        <line x1="50" y1="50" x2="78" y2="65" stroke="currentColor" stroke-width="4"/>
+        <line x1="50" y1="50" x2="22" y2="65" stroke="currentColor" stroke-width="4"/>
+      </g>
+      <circle cx="50" cy="50" r="8" fill="currentColor"/>
+      <rect x="45" y="50" width="10" height="40" fill="currentColor" rx="2"/>
+    </svg>
+  </section>
+
+  <section id="overview" class="reveal">
+    <div class="container">
+      <h2>ما هي طاقة الرياح؟</h2>
+      <p>طاقة الرياح هي تحويل طاقة الرياح إلى كهرباء باستخدام توربينات الرياح. استخدم البشر الرياح منذ آلاف السنين — من السفن الشراعية إلى طواحين الحبوب — غير أن مزارع الرياح الحديثة على نطاق واسع بدأت في سبعينيات القرن الماضي. واليوم، تُعدّ طاقة الرياح من أسرع مصادر الطاقة المتجددة نمواً في العالم.</p>
+      <p>بلغت <strong>الطاقة المركّبة عالمياً</strong> مئات الجيجاواط، وتتصدر دول كالصين والولايات المتحدة وألمانيا قائمة الدول الأعلى طاقة مركّبة. وتُعدّ طاقة الرياح ركيزةً أساسية لإزالة الكربون من قطاع الطاقة.</p>
+      <div class="icon-cards">
+        <div class="card icon-card"><span>🌬️</span> الرياح تدير الشفرات</div>
+        <div class="card icon-card"><span>⚡</span> المولّد ينتج الكهرباء</div>
+        <div class="card icon-card"><span>🌍</span> بدون وقود، انبعاثات منخفضة</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works" class="reveal">
+    <div class="container">
+      <h2>كيف يعمل؟</h2>
+      <p>تحوّل توربينات الرياح الطاقة الحركية للرياح إلى طاقة كهربائية عبر خطوات واضحة:</p>
+      <div class="timeline">
+        <div class="card step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>الرياح تضرب الشفرات</h3>
+            <p>يتسبب تدفق الهواء في دوران شفرات الدوّار حول محور أفقي (أو رأسي).</p>
+          </div>
+        </div>
+        <div class="card step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>الدوّار يحرّك المولّد</h3>
+            <p>يربط عمود الدوّار بصندوق التروس (في كثير من التصاميم)، الذي يرفع سرعة الدوران لتشغيل المولّد.</p>
+          </div>
+        </div>
+        <div class="card step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>المولّد ينتج الكهرباء</h3>
+            <p>داخل علبة التروس، يحوّل المولّد الطاقة الميكانيكية إلى كهرباء متردّدة.</p>
+          </div>
+        </div>
+        <div class="card step">
+          <span class="step-num">4</span>
+          <div>
+            <h3>الطاقة إلى الشبكة</h3>
+            <p>تُنقل الكهرباء أسفل البرج عبر كابلات إلى الشبكة الكهربائية أو وحدات التخزين.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="types" class="reveal">
+    <div class="container">
+      <h2>أنواع توربينات الرياح</h2>
+      <p>تُصنَّف توربينات الرياح حسب اتجاه المحور والموقع:</p>
+      <div class="grid-2x2">
+        <div class="card type-card">
+          <img class="type-image" src="assets/type-hawt.png" loading="lazy" alt="توربين رياح ذو محور أفقي — مزرعة رياح ورافعة تركيب">
+          <div class="type-content">
+            <h3>محور أفقي (HAWT)</h3>
+            <p>الأكثر شيوعاً. تدور الشفرات حول محور أفقي في مواجهة الرياح. فعّالة وتُستخدم على نطاق واسع براً وبحراً.</p>
+          </div>
+        </div>
+        <div class="card type-card">
+          <img class="type-image" src="assets/type-hawt-vawt.png" loading="lazy" alt="مقارنة توربين محور أفقي HAWT ومحور رأسي VAWT">
+          <div class="type-content">
+            <h3>محور رأسي (VAWT)</h3>
+            <p>تدور الشفرات حول محور رأسي. أقل شيوعاً على نطاق المرافق؛ تُستخدم في بعض التطبيقات الحضرية والمتخصصة.</p>
+          </div>
+        </div>
+        <div class="card type-card">
+          <img class="type-image" src="assets/type-onshore.png" loading="lazy" alt="توربين رياح بري — مزرعة رياح ورافعة تركيب">
+          <div class="type-content">
+            <h3>بري</h3>
+            <p>يُركَّب على الأرض. تكلفة تركيب أقل وصيانة أسهل؛ مع مراعاة استخدام الأراضي والضوضاء.</p>
+          </div>
+        </div>
+        <div class="card type-card">
+          <img class="type-image" src="assets/type-offshore.png" loading="lazy" alt="مزرعة رياح بحرية وتوربينات في البحر">
+          <div class="type-content">
+            <h3>بحري</h3>
+            <p>يُركَّب في البحار أو البحيرات. رياح أقوى وأكثر ثباتاً وتوربينات أكبر؛ تكلفة أعلى ولوجستيات أكثر تعقيداً.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="benefits" class="reveal">
+    <div class="container">
+      <h2>الفوائد</h2>
+      <div class="benefits-grid">
+        <div class="card benefit-card">
+          <span>💰</span>
+          <div>
+            <h3>اقتصادي</h3>
+            <p>أسعار كهرباء مستقرة، بدون تكلفة وقود، ووفورات طويلة الأمد للمستهلكين والمرافق.</p>
+          </div>
+        </div>
+        <div class="card benefit-card">
+          <span>🏠</span>
+          <div>
+            <h3>الاستقلالية الطاقوية</h3>
+            <p>يقلل الاعتماد على الوقود الأحفوري المستورد ويعزز الأمن الطاقوي الوطني.</p>
+          </div>
+        </div>
+        <div class="card benefit-card">
+          <span>👷</span>
+          <div>
+            <h3>خلق فرص العمل</h3>
+            <p>تُوجِد التصنيع والتركيب والصيانة وظائف في مناطق عديدة.</p>
+          </div>
+        </div>
+        <div class="card benefit-card">
+          <span>📉</span>
+          <div>
+            <h3>تكلفة تشغيل منخفضة</h3>
+            <p>بعد الإنشاء، تكون لمزارع الرياح نفقات وقود وتشغيل جارية ضئيلة.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="environment" class="reveal">
+    <div class="container">
+      <h2>البيئة</h2>
+      <p>تُقلّص طاقة الرياح بشكل ملحوظ انبعاثات ثاني أكسيد الكربون وغيرها مقارنةً بالوقود الأحفوري. ويمكن مشاركة الأراضي مع الزراعة. وتُعدّ التأثيرات على الحياة البرية ودورة الحياة من الاعتبارات المهمة:</p>
+      <div class="env-table-scroll">
+        <table>
+          <thead>
+            <tr><th>الموضوع</th><th>ملاحظات</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>توفير ثاني أكسيد الكربون</td><td>يحلّ محل توليد الوقود الأحفوري؛ انبعاثات دورة الحياة منخفضة.</td></tr>
+            <tr><td>استخدام الأراضي</td><td>البصمة صغيرة؛ يمكن استمرار استخدام الأراضي بين التوربينات.</td></tr>
+            <tr><td>الحياة البرية</td><td>تأثيرات الطيور والخفافيش مدروسة؛ يساعد الموقع والتكنولوجيا في التخفيف منها.</td></tr>
+            <tr><td>دورة الحياة</td><td>انبعاثات التصنيع وإيقاف التشغيل صغيرة نسبياً مقارنةً بالتوليد.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="future" class="reveal">
+    <div class="container">
+      <h2>مستقبل طاقة الرياح</h2>
+      <ul class="future-list">
+        <li><strong>طاقة الرياح البحرية العائمة</strong> — توربينات على منصات عائمة تتيح مواقع في المياه العميقة وطاقة أكبر.</li>
+        <li><strong>طاقة الرياح الجوية</strong> — طائرات ورقية وأنظمة طائرة تلتقط رياح الارتفاعات العالية.</li>
+        <li><strong>الشبكات الذكية</strong> — تكامل أفضل مع التخزين وإدارة الطلب.</li>
+        <li><strong>توقعات الطاقة</strong> — من المتوقع أن تنمو طاقة الرياح العالمية المركّبة بشكل ملحوظ في العقود القادمة.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="gallery" class="reveal">
+    <div class="container">
+      <h2>المعرض</h2>
+      <div class="gallery-grid">
+        <div class="gallery-item">
+          <img src="assets/gallery-hybrid.png" loading="lazy" alt="نظام هجين — توربين رياح وألواح شمسية">
+          <span class="caption">نظام هجين — توربين رياح وألواح شمسية</span>
+        </div>
+        <div class="gallery-item">
+          <img src="assets/gallery-hub.png" loading="lazy" alt="مكونات التوربين — دوار ومولد">
+          <span class="caption">مكونات التوربين — دوار ومولد</span>
+        </div>
+        <div class="gallery-item">
+          <img src="assets/gallery-storage.png" loading="lazy" alt="طاقة الرياح والشمس مع تخزين البطاريات">
+          <span class="caption">طاقة الرياح والشمس مع تخزين البطاريات</span>
+        </div>
+        <div class="gallery-item">
+          <img src="assets/gallery-hawt-diagram.png" loading="lazy" alt="كيف تعمل العنفة الهوائية ذات المحور الأفقي">
+          <span class="caption">كيف تعمل العنفة الهوائية ذات المحور الأفقي</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="donate" class="reveal">
+    <div class="container">
+      <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+        <h2 style="margin-bottom: 0.5rem; color: var(--accent);">شكراً لزيارتك موقعنا</h2>
+        <p style="margin-bottom: 2rem;">يمكنك التبرع للمساعدة في جعل العالم مكاناً أفضل وأنظف. يرجى إدخال بريدك الإلكتروني للمتابعة.</p>
+        
+        <form style="max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem;" onsubmit="event.preventDefault(); alert('شكراً لاهتمامك! هذه النسخة تجريبية.');">
+          <input type="email" placeholder="بريدك الإلكتروني (Gmail)" required 
+            style="padding: 1rem; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: var(--bg); color: var(--text); font-family: inherit; font-size: 1rem; outline: none;">
+          
+          <button type="submit" style="background: var(--accent); color: #fff; border: none; cursor: pointer; padding: 1rem; font-size: 1.1rem; border-radius: 8px; font-weight: 700; transition: opacity 0.3s;">
+            تبرع الآن
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div id="gallery-lightbox" aria-hidden="true">
+    <div class="lightbox-content">
+      <button type="button" class="lightbox-close" aria-label="إغلاق">×</button>
+      <div class="lightbox-img-wrap">
+        <img src="" alt="">
+      </div>
+      <p class="lightbox-caption"></p>
+      <div class="lightbox-controls">
+        <button type="button" id="lightbox-zoom-in" aria-label="تكبير">+</button>
+        <button type="button" id="lightbox-zoom-out" aria-label="تصغير">−</button>
+        <button type="button" id="lightbox-reset" aria-label="إعادة التعيين">⟲</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p class="tagline">نسخّر الرياح من أجل غدٍ أنظف</p>
+    <div class="footer-links">
+      <a href="#overview">نظرة عامة</a>
+      <a href="#how-it-works">كيف يعمل</a>
+      <a href="#types">الأنواع</a>
+      <a href="#benefits">الفوائد</a>
+      <a href="#environment">البيئة</a>
+      <a href="#future">المستقبل</a>
+      <a href="#gallery">المعرض</a>
+    </div>
+    <a href="#" class="back-top">العودة إلى الأعلى</a>
+  </footer>
+
+  <script>
+    (function() {
+      var themeBtn = document.querySelector('.theme-btn');
+      if (themeBtn) {
+        function setIcon() {
+          themeBtn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+        }
+        setIcon();
+        themeBtn.addEventListener('click', function() {
+          document.documentElement.classList.toggle('dark');
+          localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+          setIcon();
+        });
+      }
+
+      // Hamburger
+      var hamburger = document.querySelector('.hamburger');
+      var navList = document.querySelector('nav ul');
+      var navLinksInMenu = document.querySelectorAll('nav ul a');
+      if (hamburger && navList) {
+        hamburger.addEventListener('click', function() { navList.classList.toggle('open'); });
+        navLinksInMenu.forEach(function(link) {
+          link.addEventListener('click', function() { navList.classList.remove('open'); });
+        });
+      }
+
+      // Scroll-triggered reveal + active nav
+      var sections = document.querySelectorAll('section[id]');
+      var navLinks = document.querySelectorAll('nav a[href^="#"]');
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { rootMargin: '-10% 0px -15% 0px', threshold: 0 });
+      sections.forEach(function(s) { observer.observe(s); });
+
+      var navObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          var id = entry.target.id;
+          navLinks.forEach(function(a) {
+            if (a.getAttribute('href') === '#' + id) a.classList.add('active');
+            else a.classList.remove('active');
+          });
+        });
+      }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+      sections.forEach(function(s) { if (s.id) navObserver.observe(s); });
+
+      // Gallery lightbox — click to open, zoom, pan
+      var lightbox = document.getElementById('gallery-lightbox');
+      var lightboxImgWrap = lightbox && lightbox.querySelector('.lightbox-img-wrap');
+      var lightboxImg = lightbox && lightbox.querySelector('.lightbox-img-wrap img');
+      var lightboxCaption = lightbox && lightbox.querySelector('.lightbox-caption');
+      var zoomInBtn = document.getElementById('lightbox-zoom-in');
+      var zoomOutBtn = document.getElementById('lightbox-zoom-out');
+      var resetBtn = document.getElementById('lightbox-reset');
+
+      var scale = 1, translateX = 0, translateY = 0;
+      var dragStartX, dragStartY, startTranslateX, startTranslateY;
+      var minScale = 0.5, maxScale = 5;
+
+      function applyTransform() {
+        if (!lightboxImgWrap) return;
+        lightboxImgWrap.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + scale + ')';
+        if (zoomOutBtn) zoomOutBtn.disabled = scale <= minScale;
+        if (zoomInBtn) zoomInBtn.disabled = scale >= maxScale;
+      }
+
+      function openLightbox(src, alt, captionText) {
+        if (!lightbox || !lightboxImg) return;
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || '';
+        if (lightboxCaption) lightboxCaption.textContent = captionText || '';
+        scale = 1; translateX = 0; translateY = 0;
+        applyTransform();
+        lightbox.classList.add('open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        if (!lightbox) return;
+        lightbox.classList.remove('open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      if (lightbox) {
+        lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', function(e) {
+          if (e.target === lightbox) closeLightbox();
+        });
+      }
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && lightbox && lightbox.classList.contains('open')) closeLightbox();
+      });
+
+      if (zoomInBtn) zoomInBtn.addEventListener('click', function() {
+        if (scale >= maxScale) return;
+        scale = Math.min(maxScale, scale + 0.35);
+        applyTransform();
+      });
+      if (zoomOutBtn) zoomOutBtn.addEventListener('click', function() {
+        if (scale <= minScale) return;
+        scale = Math.max(minScale, scale - 0.35);
+        applyTransform();
+      });
+      if (resetBtn) resetBtn.addEventListener('click', function() {
+        scale = 1; translateX = 0; translateY = 0;
+        applyTransform();
+      });
+
+      if (lightboxImgWrap) {
+        lightboxImgWrap.addEventListener('mousedown', function(e) {
+          if (e.button !== 0) return;
+          e.preventDefault();
+          lightboxImgWrap.classList.add('dragging');
+          dragStartX = e.clientX - translateX;
+          dragStartY = e.clientY - translateY;
+          startTranslateX = translateX;
+          startTranslateY = translateY;
+          function onMove(ev) {
+            translateX = ev.clientX - dragStartX;
+            translateY = ev.clientY - dragStartY;
+            applyTransform();
+          }
+          function onUp() {
+            lightboxImgWrap.classList.remove('dragging');
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+          }
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
+        });
+        lightboxImgWrap.addEventListener('wheel', function(e) {
+          e.preventDefault();
+          var delta = e.deltaY > 0 ? -0.2 : 0.2;
+          scale = Math.max(minScale, Math.min(maxScale, scale + delta));
+          applyTransform();
+        }, { passive: false });
+      }
+
+      var galleryItems = document.querySelectorAll('#gallery .gallery-item');
+      galleryItems.forEach(function(item) {
+        var img = item.querySelector('img');
+        var cap = item.querySelector('.caption');
+        if (!img) return;
+        item.addEventListener('click', function() {
+          openLightbox(img.src, img.alt, cap ? cap.textContent : '');
+        });
+      });
+
+      // Types section — click type image to open in lightbox for zoom/inspect
+      var typeCards = document.querySelectorAll('#types .type-card');
+      typeCards.forEach(function(card) {
+        var img = card.querySelector('.type-image');
+        var title = card.querySelector('h3');
+        if (!img) return;
+        card.addEventListener('click', function() {
+          openLightbox(img.src, img.alt, title ? title.textContent : '');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
